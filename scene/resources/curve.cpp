@@ -1606,12 +1606,8 @@ void Curve3D::_bake() const {
 
 #ifdef TOOLS_ENABLED
 		points_in_cache.resize(_closed ? (points.size() + 1) : points.size());
-		// WARN_PRINT("points_in_cache size: " + String::num_uint64(points_in_cache.size()));
-		print_line("  points_in_cache size: " + String::num_uint64(baked_tilt_cache.size()));
-		// WARN_PRINT("  points_in_cache size: " + String::num_uint64(points_in_cache.size()));
 		points_in_cache.set(0, 0);
 #endif
-		print_line("  points_in_cache size: " + String::num_uint64(baked_tilt_cache.size()));
 
 		// Point Count: Begins at 1 to account for the last point
 		int pc = 1;
@@ -1642,12 +1638,12 @@ void Curve3D::_bake() const {
 			for (const KeyValue<real_t, Vector3> &E : midpoints[i]) {
 				pidx++;
 				bpw[pidx] = E.value;
-				if (_closed && i == num_intervals - 1) {
-					bfw[pidx] = _calculate_tangent(points[i].position, points[i].position + points[i].out, points[0].position + points[0].in, points[0].position, E.key);
-					btw[pidx] = Math::lerp(points[i].tilt, points[0].tilt, E.key);
-				} else {
+				if (!_closed || i < num_intervals - 1) {
 					bfw[pidx] = _calculate_tangent(points[i].position, points[i].position + points[i].out, points[i + 1].position + points[i + 1].in, points[i + 1].position, E.key);
 					btw[pidx] = Math::lerp(points[i].tilt, points[i + 1].tilt, E.key);
+				} else {
+					bfw[pidx] = _calculate_tangent(points[i].position, points[i].position + points[i].out, points[0].position + points[0].in, points[0].position, E.key);
+					btw[pidx] = Math::lerp(points[i].tilt, points[0].tilt, E.key);
 				}
 			}
 
