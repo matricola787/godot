@@ -263,7 +263,7 @@ class Curve3D : public Resource {
 	mutable Vector<size_t> points_in_cache;
 #endif
 
-	bool _closed = false;
+	bool closed = false;
 
 	mutable bool baked_cache_dirty = false;
 	mutable PackedVector3Array baked_point_cache;
