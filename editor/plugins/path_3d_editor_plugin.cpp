@@ -276,7 +276,14 @@ void Path3DGizmo::redraw() {
 	Ref<StandardMaterial3D> path_thin_material = gizmo_plugin->get_material("path_thin_material", this);
 	Ref<StandardMaterial3D> path_tilt_material = gizmo_plugin->get_material("path_tilt_material", this);
 	Ref<StandardMaterial3D> handles_material = gizmo_plugin->get_material("handles");
+	Ref<StandardMaterial3D> first_pt_handle_material = gizmo_plugin->get_material("first_pt_handle");
+	Ref<StandardMaterial3D> last_pt_handle_material = gizmo_plugin->get_material("last_pt_handle");
+	Ref<StandardMaterial3D> closed_pt_handle_material = gizmo_plugin->get_material("closed_pt_handle");
 	Ref<StandardMaterial3D> sec_handles_material = gizmo_plugin->get_material("sec_handles");
+
+	first_pt_handle_material->set_albedo(Color(0.0, 1.0, 0.0));
+	last_pt_handle_material->set_albedo(Color(1.0, 0.0, 0.0));
+	closed_pt_handle_material->set_albedo(Color(1.0, 1.0, 0.0));
 
 	Ref<Curve3D> c = path->get_curve();
 	if (c.is_null()) {
@@ -436,8 +443,21 @@ void Path3DGizmo::redraw() {
 			add_lines(tilt_handle_lines, path_tilt_material);
 		}
 
-		if (primary_handle_points.size()) {
-			add_handles(primary_handle_points, handles_material);
+		const int pc = primary_handle_points.size();
+		if (pc) {
+			PackedVector3Array first_pt_handle_point;
+			first_pt_handle_point.append(primary_handle_points[0]);
+			if (pc > 1) {
+				PackedVector3Array last_pt_handle_point;
+				last_pt_handle_point.append(primary_handle_points[pc - 1]);
+				primary_handle_points.remove_at(pc - 1);
+				add_handles(last_pt_handle_point, c->is_closed() ? handles_material : last_pt_handle_material);
+			}
+			primary_handle_points.remove_at(0);
+			add_handles(first_pt_handle_point, c->is_closed() ? closed_pt_handle_material : first_pt_handle_material);
+			if (primary_handle_points.size()) {
+				add_handles(primary_handle_points, handles_material);
+			}
 		}
 		if (secondary_handle_points.size()) {
 			add_handles(secondary_handle_points, sec_handles_material, collected_secondary_handle_ids, false, true);
@@ -833,5 +853,8 @@ Path3DGizmoPlugin::Path3DGizmoPlugin(float p_disk_size) {
 	create_material("path_thin_material", Color(0.6, 0.6, 0.6));
 	create_material("path_tilt_material", path_tilt_color);
 	create_handle_material("handles", false, EditorNode::get_singleton()->get_editor_theme()->get_icon(SNAME("EditorPathSmoothHandle"), EditorStringName(EditorIcons)));
+	create_handle_material("first_pt_handle", false, EditorNode::get_singleton()->get_editor_theme()->get_icon(SNAME("EditorPathSmoothHandle"), EditorStringName(EditorIcons)));
+	create_handle_material("last_pt_handle", false, EditorNode::get_singleton()->get_editor_theme()->get_icon(SNAME("EditorPathSmoothHandle"), EditorStringName(EditorIcons)));
+	create_handle_material("closed_pt_handle", false, EditorNode::get_singleton()->get_editor_theme()->get_icon(SNAME("EditorPathSmoothHandle"), EditorStringName(EditorIcons)));
 	create_handle_material("sec_handles", false, EditorNode::get_singleton()->get_editor_theme()->get_icon(SNAME("EditorCurveHandle"), EditorStringName(EditorIcons)));
 }
