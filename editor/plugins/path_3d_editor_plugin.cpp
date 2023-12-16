@@ -376,7 +376,7 @@ void Path3DGizmo::redraw() {
 			info.point_idx = idx;
 
 			// Collect in-handles except for the first point.
-			if (idx > 0) {
+			if (idx > (c->is_closed() ? -1 : 0)) {
 				info.type = HandleType::HANDLE_TYPE_IN;
 				const int handle_idx = idx * 3 + 0;
 				collected_secondary_handle_ids.append(handle_idx);
@@ -389,7 +389,7 @@ void Path3DGizmo::redraw() {
 			}
 
 			// Collect out-handles except for the last point.
-			if (idx < c->get_point_count() - 1) {
+			if (idx < (c->is_closed() ? c->get_point_count() : c->get_point_count() - 1)) {
 				info.type = HandleType::HANDLE_TYPE_OUT;
 				const int handle_idx = idx * 3 + 1;
 				collected_secondary_handle_ids.append(handle_idx);
