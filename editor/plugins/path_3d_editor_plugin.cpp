@@ -113,7 +113,6 @@ void Path3DGizmo::set_handle(int p_id, bool p_secondary, Camera3D *p_camera, con
 		Vector3 inters;
 		// Special cas for primary handle, the handle id equals control point id.
 		const int idx = p_id;
-		print_line("Set_handle idx: " + String::num_int64(idx));
 		if (p.intersects_ray(ray_from, ray_dir, &inters)) {
 			if (Node3DEditor::get_singleton()->is_snap_enabled()) {
 				float snap = Node3DEditor::get_singleton()->get_translate_snap();

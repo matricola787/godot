@@ -2097,6 +2097,7 @@ real_t Curve3D::get_closest_offset(const Vector3 &p_to_point) const {
 void Curve3D::set_closed(bool p_closed) {
 	closed = p_closed;
 	mark_dirty();
+	notify_property_list_changed();
 }
 
 bool Curve3D::is_closed() const {
@@ -2327,13 +2328,13 @@ void Curve3D::_get_property_list(List<PropertyInfo> *p_list) const {
 		pi.usage &= ~PROPERTY_USAGE_STORAGE;
 		p_list->push_back(pi);
 
-		if (i != 0) {
+		if (i != 0 || is_closed()) {
 			pi = PropertyInfo(Variant::VECTOR3, vformat("point_%d/in", i));
 			pi.usage &= ~PROPERTY_USAGE_STORAGE;
 			p_list->push_back(pi);
 		}
 
-		if (i != points.size() - 1) {
+		if (i != points.size() - 1 || is_closed()) {
 			pi = PropertyInfo(Variant::VECTOR3, vformat("point_%d/out", i));
 			pi.usage &= ~PROPERTY_USAGE_STORAGE;
 			p_list->push_back(pi);
