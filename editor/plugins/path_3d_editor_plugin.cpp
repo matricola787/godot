@@ -711,7 +711,7 @@ void Path3DEditorPlugin::_toggle_closed_curve() {
 	if (c.is_null()) {
 		return;
 	}
-	if (c->get_point_count() < 3) {
+	if (c->get_point_count() < 2) {
 		return;
 	}
 	EditorUndoRedoManager *ur = EditorUndoRedoManager::get_singleton();
