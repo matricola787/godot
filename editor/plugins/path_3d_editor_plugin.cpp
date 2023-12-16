@@ -113,6 +113,7 @@ void Path3DGizmo::set_handle(int p_id, bool p_secondary, Camera3D *p_camera, con
 		Vector3 inters;
 		// Special cas for primary handle, the handle id equals control point id.
 		const int idx = p_id;
+		print_line("Set_handle idx: " + String::num_int64(idx));
 		if (p.intersects_ray(ray_from, ray_dir, &inters)) {
 			if (Node3DEditor::get_singleton()->is_snap_enabled()) {
 				float snap = Node3DEditor::get_singleton()->get_translate_snap();
@@ -443,20 +444,41 @@ void Path3DGizmo::redraw() {
 			add_lines(tilt_handle_lines, path_tilt_material);
 		}
 
+		// Primary handles: manage different colors for first, intermediate and last points.
 		const int pc = primary_handle_points.size();
 		if (pc) {
+			// Need to define indices separately.
+			Vector<int> idx;
+			idx.resize(pc);
+			for (int j = 0; j < pc; j++) {
+				idx.write[j] = j;
+			}
+
+			// Initialize arrays for first point.
 			PackedVector3Array first_pt_handle_point;
+			Vector<int> first_pt_id;
 			first_pt_handle_point.append(primary_handle_points[0]);
+			first_pt_id.append(idx[0]);
+
+			// Initialize arrays and add handle for last point if needed.
 			if (pc > 1) {
 				PackedVector3Array last_pt_handle_point;
+				Vector<int> last_pt_id;
 				last_pt_handle_point.append(primary_handle_points[pc - 1]);
+				last_pt_id.append(idx[pc - 1]);
 				primary_handle_points.remove_at(pc - 1);
-				add_handles(last_pt_handle_point, c->is_closed() ? handles_material : last_pt_handle_material);
+				idx.remove_at(pc - 1);
+				add_handles(last_pt_handle_point, c->is_closed() ? handles_material : last_pt_handle_material, last_pt_id);
 			}
+
+			// Add handle for first point.
 			primary_handle_points.remove_at(0);
-			add_handles(first_pt_handle_point, c->is_closed() ? closed_pt_handle_material : first_pt_handle_material);
+			idx.remove_at(0);
+			add_handles(first_pt_handle_point, c->is_closed() ? closed_pt_handle_material : first_pt_handle_material, first_pt_id);
+
+			// Add handles for remaining intermediate points.
 			if (primary_handle_points.size()) {
-				add_handles(primary_handle_points, handles_material);
+				add_handles(primary_handle_points, handles_material, idx);
 			}
 		}
 		if (secondary_handle_points.size()) {
