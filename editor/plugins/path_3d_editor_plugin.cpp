@@ -665,21 +665,18 @@ void Path3DEditorPlugin::_mode_changed(int p_mode) {
 	curve_del->set_pressed(p_mode == MODE_DELETE);
 }
 
-void Path3DEditorPlugin::_close_curve() {
+void Path3DEditorPlugin::_toggle_closed_curve() {
 	Ref<Curve3D> c = path->get_curve();
 	if (c.is_null()) {
 		return;
 	}
-	if (c->get_point_count() < 2) {
-		return;
-	}
-	if (c->get_point_position(0) == c->get_point_position(c->get_point_count() - 1)) {
+	if (c->get_point_count() < 3) {
 		return;
 	}
 	EditorUndoRedoManager *ur = EditorUndoRedoManager::get_singleton();
-	ur->create_action(TTR("Close Curve"));
-	ur->add_do_method(c.ptr(), "add_point", c->get_point_position(0), c->get_point_in(0), c->get_point_out(0), -1);
-	ur->add_undo_method(c.ptr(), "remove_point", c->get_point_count());
+	ur->create_action(TTR("Toggle Open/Closed Curve"));
+	ur->add_do_method(c.ptr(), "toggle_closed");
+	ur->add_undo_method(c.ptr(), "toggle_closed");
 	ur->commit_action();
 }
 
@@ -709,7 +706,7 @@ void Path3DEditorPlugin::_update_theme() {
 	curve_edit_curve->set_icon(EditorNode::get_singleton()->get_editor_theme()->get_icon(SNAME("CurveCurve"), EditorStringName(EditorIcons)));
 	curve_create->set_icon(EditorNode::get_singleton()->get_editor_theme()->get_icon(SNAME("CurveCreate"), EditorStringName(EditorIcons)));
 	curve_del->set_icon(EditorNode::get_singleton()->get_editor_theme()->get_icon(SNAME("CurveDelete"), EditorStringName(EditorIcons)));
-	curve_close->set_icon(EditorNode::get_singleton()->get_editor_theme()->get_icon(SNAME("CurveClose"), EditorStringName(EditorIcons)));
+	curve_closed->set_icon(EditorNode::get_singleton()->get_editor_theme()->get_icon(SNAME("CurveClose"), EditorStringName(EditorIcons)));
 }
 
 void Path3DEditorPlugin::_notification(int p_what) {
@@ -719,7 +716,7 @@ void Path3DEditorPlugin::_notification(int p_what) {
 			curve_edit_curve->connect("pressed", callable_mp(this, &Path3DEditorPlugin::_mode_changed).bind(MODE_EDIT_CURVE));
 			curve_edit->connect("pressed", callable_mp(this, &Path3DEditorPlugin::_mode_changed).bind(MODE_EDIT));
 			curve_del->connect("pressed", callable_mp(this, &Path3DEditorPlugin::_mode_changed).bind(MODE_DELETE));
-			curve_close->connect("pressed", callable_mp(this, &Path3DEditorPlugin::_close_curve));
+			curve_closed->connect("pressed", callable_mp(this, &Path3DEditorPlugin::_toggle_closed_curve));
 
 			_update_theme();
 		} break;
@@ -781,11 +778,11 @@ Path3DEditorPlugin::Path3DEditorPlugin() {
 	curve_del->set_tooltip_text(TTR("Delete Point"));
 	topmenu_bar->add_child(curve_del);
 
-	curve_close = memnew(Button);
-	curve_close->set_theme_type_variation("FlatButton");
-	curve_close->set_focus_mode(Control::FOCUS_NONE);
-	curve_close->set_tooltip_text(TTR("Close Curve"));
-	topmenu_bar->add_child(curve_close);
+	curve_closed = memnew(Button);
+	curve_closed->set_theme_type_variation("FlatButton");
+	curve_closed->set_focus_mode(Control::FOCUS_NONE);
+	curve_closed->set_tooltip_text(TTR("Toggle Open/Closed Curve"));
+	topmenu_bar->add_child(curve_closed);
 
 	PopupMenu *menu;
 

@@ -1450,6 +1450,9 @@ void Curve3D::_remove_point(int p_index) {
 
 void Curve3D::remove_point(int p_index) {
 	_remove_point(p_index);
+	if (points.size() < 3 && closed) {
+		set_closed(false);
+	}
 	notify_property_list_changed();
 }
 
@@ -2100,6 +2103,10 @@ bool Curve3D::is_closed() const {
 	return closed;
 }
 
+void Curve3D::toggle_closed() {
+	set_closed(!closed);
+}
+
 void Curve3D::set_bake_interval(real_t p_tolerance) {
 	bake_interval = p_tolerance;
 	mark_dirty();
@@ -2356,6 +2363,7 @@ void Curve3D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("samplef", "fofs"), &Curve3D::samplef);
 	ClassDB::bind_method(D_METHOD("set_closed", "p_closed"), &Curve3D::set_closed);
 	ClassDB::bind_method(D_METHOD("is_closed"), &Curve3D::is_closed);
+	ClassDB::bind_method(D_METHOD("toggle_closed"), &Curve3D::toggle_closed);
 	//ClassDB::bind_method(D_METHOD("bake","subdivs"),&Curve3D::bake,DEFVAL(10));
 	ClassDB::bind_method(D_METHOD("set_bake_interval", "distance"), &Curve3D::set_bake_interval);
 	ClassDB::bind_method(D_METHOD("get_bake_interval"), &Curve3D::get_bake_interval);

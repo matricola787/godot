@@ -333,6 +333,7 @@ public:
 
 	void set_closed(bool p_closed);
 	bool is_closed() const;
+	void toggle_closed();
 	void set_bake_interval(real_t p_tolerance);
 	real_t get_bake_interval() const;
 	void set_up_vector_enabled(bool p_enable);
